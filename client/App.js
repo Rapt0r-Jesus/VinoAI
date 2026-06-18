@@ -3,18 +3,34 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import { Text, View } from 'react-native';
 import CameraScreen from './screens/CameraScreen';
+import ResultScreen from './screens/ResultScreen';
 
 // Placeholders temporaires
 const HomeScreen = ({ navigation }) => (
   <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-    <Text onPress={() => navigation.navigate('Camera')} 
-          style={{ fontSize: 18, padding: 20, backgroundColor: '#C9A96E' }}>
+    <Text onPress={() => navigation.navigate('Camera')}
+          style={{ fontSize: 18, padding: 20, backgroundColor: '#C9A96E', marginBottom: 10 }}>
       Open Camera
+    </Text>
+    <Text onPress={() => navigation.navigate('Result', {
+      wine: {
+        name: 'Château Margaux',
+        vintage: 2018,
+        producer: 'Château Margaux',
+        region: 'Bordeaux',
+        grape: 'Cabernet Sauvignon',
+        appellation: 'Margaux AOC',
+        tasting_notes: 'Dark plum, cedar, long finish.',
+        food_pairings: ['Lamb', 'Duck confit', 'Aged cheese'],
+      }
+    })}
+          style={{ fontSize: 18, padding: 20, backgroundColor: '#1D9E75' }}>
+      Test Result Screen
     </Text>
   </View>
 );
+
 const HistoryScreen = () => <View><Text>History</Text></View>;
-const ResultScreen  = () => <View><Text>Result</Text></View>;
 const NotesScreen   = () => <View><Text>Notes</Text></View>;
 
 const Tab   = createBottomTabNavigator();
