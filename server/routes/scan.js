@@ -32,6 +32,9 @@ router.post('/', async (req, res) => {
     return res.status(200).json(payload);
 
   } catch (error) {
+    console.error('SCAN ERROR DETAILS:', error.message);
+    console.error(error.stack);
+
     if (error.message.includes('EXTRACTION_FAILED')) {
       return res.status(422).json({
         error: { code: 'EXTRACTION_FAILED', message: 'Could not extract wine name from label' }
@@ -62,6 +65,7 @@ router.get('/wines/search', async (req, res) => {
     const results = await wineController.searchWine(q, parseInt(limit));
     return res.status(200).json({ results, total: results.length });
   } catch (error) {
+    console.error('SEARCH ERROR DETAILS:', error.message);
     return res.status(503).json({
       error: { code: 'SERVICE_UNAVAILABLE', message: 'GrapeMinds API unavailable' }
     });

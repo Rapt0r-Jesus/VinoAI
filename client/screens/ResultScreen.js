@@ -1,7 +1,26 @@
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import { useState } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { saveWine } from '../database';
 
 export default function ResultScreen({ route, navigation }) {
   const wine = route.params?.wine || {};
+  const [isSaved, setIsSaved] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleSave = async () => {
+    if (isSaved || isSaving) return;
+    setIsSaving(true);
+    try {
+      await saveWine(wine);
+      setIsSaved(true);
+      Alert.alert('Saved!', `${wine.name} a été ajouté à ta cave.`);
+    } catch (err) {
+      console.error('Erreur sauvegarde:', err);
+      Alert.alert('Erreur', "Impossible de sauvegarder ce vin.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   return (
     <ScrollView style={styles.container}>
@@ -55,8 +74,14 @@ export default function ResultScreen({ route, navigation }) {
         ) : null}
 
         {/* Save button */}
-        <TouchableOpacity style={styles.saveButton}>
-          <Text style={styles.saveButtonText}>💾 Save to my cellar</Text>
+        <TouchableOpacity
+          style={[styles.saveButton, isSaved && styles.saveButtonDisabled]}
+          onPress={handleSave}
+          disabled={isSaved || isSaving}
+        >
+          <Text style={styles.saveButtonText}>
+            {isSaved ? '✓ Saved to cellar' : isSaving ? 'Saving...' : '💾 Save to my cellar'}
+          </Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
@@ -80,5 +105,6 @@ const styles = StyleSheet.create({
   pairing:        { backgroundColor: '#F9F4EE', borderWidth: 1, borderColor: '#DDD0C0', borderRadius: 20, paddingHorizontal: 12, paddingVertical: 4 },
   pairingText:    { color: '#5C3D2E', fontSize: 13 },
   saveButton:     { backgroundColor: '#6B2D3E', borderRadius: 12, padding: 16, alignItems: 'center', marginTop: 20, marginBottom: 40 },
+  saveButtonDisabled: { backgroundColor: '#A89080' },
   saveButtonText: { color: '#F9F4EE', fontSize: 16, fontWeight: '700' },
 });

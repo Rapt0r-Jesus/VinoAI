@@ -3,8 +3,9 @@ const axios = require('axios');
 class ClaudeService {
   constructor() {
     this.apiKey = process.env.CLAUDE_API_KEY;
-    this.model = 'claude-opus-4-5';
+    this.model = 'claude-sonnet-4-6';
     this.maxTokens = 1024;
+    console.log('Claude key loaded:', this.apiKey ? this.apiKey.substring(0, 20) + '...' : 'UNDEFINED');
   }
 
   async sendImagePrompt(imageBase64, mimeType = 'image/jpeg') {
@@ -49,7 +50,6 @@ class ClaudeService {
 
   _parseResponse(data) {
     const text = data.content[0].text;
-    // Nettoie le texte et extrait le JSON
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (!jsonMatch) throw new Error('No JSON found in Claude response');
     return JSON.parse(jsonMatch[0]);

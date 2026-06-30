@@ -1,9 +1,11 @@
+import { useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
-import { Text, View } from 'react-native';
+import { Text, View, ActivityIndicator } from 'react-native';
 import CameraScreen from './screens/CameraScreen';
 import ResultScreen from './screens/ResultScreen';
+import { initDatabase } from './database';
 
 // Placeholders temporaires
 const HomeScreen = ({ navigation }) => (
@@ -48,6 +50,23 @@ function MainStack() {
 }
 
 export default function App() {
+  const [isDbReady, setIsDbReady] = useState(false);
+
+  useEffect(() => {
+    initDatabase()
+      .then(() => setIsDbReady(true))
+      .catch((err) => console.error('Erreur init DB:', err));
+  }, []);
+
+  if (!isDbReady) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#6B2D3E" />
+        <Text style={{ marginTop: 10 }}>Chargement de la base de données...</Text>
+      </View>
+    );
+  }
+
   return (
     <NavigationContainer>
       <Tab.Navigator>
