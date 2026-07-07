@@ -4,3 +4,5 @@ build/
 *.log
 .expo/
 .DS_Store
+
+server/cache.db

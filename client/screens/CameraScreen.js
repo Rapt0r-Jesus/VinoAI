@@ -2,6 +2,8 @@ import { useState, useRef } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 
+const API_URL = 'http://10.5.3.46:3000/api/v1/scan';
+
 export default function CameraScreen({ navigation }) {
   const [permission, requestPermission] = useCameraPermissions();
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -24,18 +26,33 @@ export default function CameraScreen({ navigation }) {
     );
   }
 
-  // Prendre la photo
+  // Prendre la photo et l'envoyer au serveur
   const takePicture = async () => {
     if (!cameraRef.current || isAnalyzing) return;
     try {
       setIsAnalyzing(true);
       const photo = await cameraRef.current.takePictureAsync({ base64: true, quality: 0.7 });
       console.log('Photo taken, base64 length:', photo.base64.length);
-      // On enverra au back-end dans T-17
-      Alert.alert('Success', 'Photo captured! Ready to send to API.');
+
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: photo.base64, format: 'jpeg' }),
+      });
+
+      if (!response.ok) {
+        const errData = await response.json().catch(() => null);
+        throw new Error(errData?.error?.message || `Server error: ${response.status}`);
+      }
+
+      const wine = await response.json();
+      console.log('Wine data received:', wine);
+
+      navigation.navigate('Result', { wine });
+
     } catch (error) {
-      Alert.alert('Error', 'Failed to take picture.');
-      console.error(error);
+      Alert.alert('Error', error.message || 'Failed to analyze the photo.');
+      console.error('Scan error:', error);
     } finally {
       setIsAnalyzing(false);
     }
