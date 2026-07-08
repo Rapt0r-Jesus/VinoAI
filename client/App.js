@@ -5,6 +5,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { Text, View, ActivityIndicator } from 'react-native';
 import CameraScreen from './screens/CameraScreen';
 import ResultScreen from './screens/ResultScreen';
+import HistoryScreen from './screens/HistoryScreen';
 import { initDatabase } from './database';
 
 // Placeholders temporaires
@@ -32,8 +33,7 @@ const HomeScreen = ({ navigation }) => (
   </View>
 );
 
-const HistoryScreen = () => <View><Text>History</Text></View>;
-const NotesScreen   = () => <View><Text>Notes</Text></View>;
+const NotesScreen = () => <View><Text>Notes</Text></View>;
 
 const Tab   = createBottomTabNavigator();
 const Stack = createStackNavigator();
