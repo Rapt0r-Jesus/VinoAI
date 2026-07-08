@@ -6,9 +6,9 @@ import { Text, View, ActivityIndicator } from 'react-native';
 import CameraScreen from './screens/CameraScreen';
 import ResultScreen from './screens/ResultScreen';
 import HistoryScreen from './screens/HistoryScreen';
+import NotesScreen from './screens/NotesScreen';
 import { initDatabase } from './database';
 
-// Placeholders temporaires
 const HomeScreen = ({ navigation }) => (
   <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
     <Text onPress={() => navigation.navigate('Camera')}
@@ -33,18 +33,27 @@ const HomeScreen = ({ navigation }) => (
   </View>
 );
 
-const NotesScreen = () => <View><Text>Notes</Text></View>;
-
 const Tab   = createBottomTabNavigator();
 const Stack = createStackNavigator();
 
-function MainStack() {
+// Stack pour l'onglet Scan
+function ScanStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Home"   component={HomeScreen} />
       <Stack.Screen name="Camera" component={CameraScreen} />
       <Stack.Screen name="Result" component={ResultScreen} />
       <Stack.Screen name="Notes"  component={NotesScreen} />
+    </Stack.Navigator>
+  );
+}
+
+// Stack pour l'onglet History
+function HistoryStack() {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="HistoryMain" component={HistoryScreen} />
+      <Stack.Screen name="Notes"       component={NotesScreen} />
     </Stack.Navigator>
   );
 }
@@ -70,8 +79,8 @@ export default function App() {
   return (
     <NavigationContainer>
       <Tab.Navigator>
-        <Tab.Screen name="Scan"    component={MainStack} />
-        <Tab.Screen name="History" component={HistoryScreen} />
+        <Tab.Screen name="Scan"    component={ScanStack} />
+        <Tab.Screen name="History" component={HistoryStack} />
       </Tab.Navigator>
     </NavigationContainer>
   );

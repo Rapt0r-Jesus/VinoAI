@@ -4,7 +4,6 @@ let db;
 
 export async function initDatabase() {
   db = await SQLite.openDatabaseAsync('vinoai.db');
-
   await db.execAsync(`
     PRAGMA journal_mode = WAL;
 
@@ -47,7 +46,6 @@ export function getDatabase() {
 // Sauvegarder un vin scanné
 export async function saveWine(wine) {
   const database = getDatabase();
-
   const result = await database.runAsync(
     `INSERT INTO wines (name, vintage, producer, region, grape, appellation, tasting_notes, food_pairings, grapeminds_id, scanned_at)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -64,17 +62,54 @@ export async function saveWine(wine) {
       new Date().toISOString(),
     ]
   );
-
   return result.lastInsertRowId;
 }
 
-// Récupérer tous les vins sauvegardés (pour l'écran History)
+// Récupérer tous les vins sauvegardés
 export async function getAllWines() {
   const database = getDatabase();
   const wines = await database.getAllAsync('SELECT * FROM wines ORDER BY scanned_at DESC');
-
   return wines.map(w => ({
     ...w,
     food_pairings: JSON.parse(w.food_pairings || '[]'),
   }));
+}
+
+// Récupérer un vin par son ID
+export async function getWineById(wineId) {
+  const database = getDatabase();
+  const wine = await database.getFirstAsync('SELECT * FROM wines WHERE id = ?', [wineId]);
+  if (!wine) return null;
+  return {
+    ...wine,
+    food_pairings: JSON.parse(wine.food_pairings || '[]'),
+  };
+}
+
+// Récupérer la note personnelle d'un vin
+export async function getNoteByWineId(wineId) {
+  const database = getDatabase();
+  return await database.getFirstAsync(
+    'SELECT * FROM user_notes WHERE wine_id = ?',
+    [wineId]
+  );
+}
+
+// Sauvegarder ou mettre à jour une note personnelle
+export async function saveNote(wineId, rating, noteText) {
+  const database = getDatabase();
+  const existing = await getNoteByWineId(wineId);
+  const now = new Date().toISOString();
+
+  if (existing) {
+    await database.runAsync(
+      'UPDATE user_notes SET rating = ?, note_text = ?, updated_at = ? WHERE wine_id = ?',
+      [rating, noteText, now, wineId]
+    );
+  } else {
+    await database.runAsync(
+      'INSERT INTO user_notes (wine_id, rating, note_text, created_at, updated_at) VALUES (?, ?, ?, ?, ?)',
+      [wineId, rating, noteText, now, now]
+    );
+  }
 }
