@@ -9,12 +9,10 @@ export default function CameraScreen({ navigation }) {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const cameraRef = useRef(null);
 
-  // Pas encore de permission
   if (!permission) {
     return <View />;
   }
 
-  // Permission refusée
   if (!permission.granted) {
     return (
       <View style={styles.container}>
@@ -26,7 +24,6 @@ export default function CameraScreen({ navigation }) {
     );
   }
 
-  // Prendre la photo et l'envoyer au serveur
   const takePicture = async () => {
     if (!cameraRef.current || isAnalyzing) return;
     try {
@@ -40,18 +37,52 @@ export default function CameraScreen({ navigation }) {
         body: JSON.stringify({ image: photo.base64, format: 'jpeg' }),
       });
 
-      if (!response.ok) {
-        const errData = await response.json().catch(() => null);
-        throw new Error(errData?.error?.message || `Server error: ${response.status}`);
+      const data = await response.json().catch(() => null);
+
+      // Résultat non trouvé (422 = Claude n'a pas pu lire l'étiquette)
+      if (response.status === 422) {
+        Alert.alert(
+          '🔍 Résultat non trouvé',
+          'Impossible de reconnaître cette étiquette. Essayez de mieux éclairer la bouteille ou de la cadrer différemment.',
+          [{ text: 'Réessayer', style: 'default' }]
+        );
+        return;
       }
 
-      const wine = await response.json();
-      console.log('Wine data received:', wine);
+      // Vin non trouvé dans la base de données
+      if (response.status === 404 || data?.error?.code === 'NOT_FOUND') {
+        Alert.alert(
+          '🍾 Résultat non trouvé',
+          'Ce vin n\'a pas été trouvé dans notre base de données.',
+          [{ text: 'Réessayer', style: 'default' }]
+        );
+        return;
+      }
 
+      // Autre erreur serveur
+      if (!response.ok) {
+        throw new Error(data?.error?.message || `Server error: ${response.status}`);
+      }
+
+      const wine = data;
+      console.log('Wine data received:', wine);
       navigation.navigate('Result', { wine });
 
     } catch (error) {
-      Alert.alert('Error', error.message || 'Failed to analyze the photo.');
+      // Erreur réseau
+      if (error.message?.includes('Network request failed') || error.message?.includes('timed out')) {
+        Alert.alert(
+          '📡 Connexion impossible',
+          'Impossible de joindre le serveur. Vérifiez que vous êtes sur le bon réseau Wi-Fi.',
+          [{ text: 'OK', style: 'default' }]
+        );
+      } else {
+        Alert.alert(
+          '🔍 Résultat non trouvé',
+          'Une erreur est survenue lors de l\'analyse. Réessayez.',
+          [{ text: 'Réessayer', style: 'default' }]
+        );
+      }
       console.error('Scan error:', error);
     } finally {
       setIsAnalyzing(false);
@@ -61,21 +92,18 @@ export default function CameraScreen({ navigation }) {
   return (
     <View style={styles.container}>
       <CameraView style={styles.camera} ref={cameraRef}>
-        {/* Frame overlay */}
         <View style={styles.overlay}>
           <View style={styles.frame} />
           <Text style={styles.hint}>Align the label in the frame</Text>
         </View>
       </CameraView>
 
-      {/* Analyzing indicator */}
       {isAnalyzing && (
         <View style={styles.analyzingBar}>
           <Text style={styles.analyzingText}>Analyzing label with AI...</Text>
         </View>
       )}
 
-      {/* Shutter button */}
       <View style={styles.shutterContainer}>
         <TouchableOpacity
           style={[styles.shutterButton, isAnalyzing && styles.shutterDisabled]}
