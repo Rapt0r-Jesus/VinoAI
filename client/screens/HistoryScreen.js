@@ -46,7 +46,7 @@ export default function HistoryScreen({ navigation }) {
   const renderWineItem = ({ item }) => (
     <TouchableOpacity
       style={styles.wineItem}
-      onPress={() => navigation.navigate('Result', { wine: item })}
+      onPress={() => navigation.navigate('Notes', { wine: item })}
     >
       <View style={styles.wineIcon}>
         <Text style={styles.wineIconText}>🍷</Text>
