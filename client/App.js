@@ -7,36 +7,12 @@ import CameraScreen from './screens/CameraScreen';
 import ResultScreen from './screens/ResultScreen';
 import HistoryScreen from './screens/HistoryScreen';
 import NotesScreen from './screens/NotesScreen';
+import HomeScreen from './screens/HomeScreen';
 import { initDatabase } from './database';
-
-const HomeScreen = ({ navigation }) => (
-  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-    <Text onPress={() => navigation.navigate('Camera')}
-          style={{ fontSize: 18, padding: 20, backgroundColor: '#C9A96E', marginBottom: 10 }}>
-      Open Camera
-    </Text>
-    <Text onPress={() => navigation.navigate('Result', {
-      wine: {
-        name: 'Château Margaux',
-        vintage: 2018,
-        producer: 'Château Margaux',
-        region: 'Bordeaux',
-        grape: 'Cabernet Sauvignon',
-        appellation: 'Margaux AOC',
-        tasting_notes: 'Dark plum, cedar, long finish.',
-        food_pairings: ['Lamb', 'Duck confit', 'Aged cheese'],
-      }
-    })}
-          style={{ fontSize: 18, padding: 20, backgroundColor: '#1D9E75' }}>
-      Test Result Screen
-    </Text>
-  </View>
-);
 
 const Tab   = createBottomTabNavigator();
 const Stack = createStackNavigator();
 
-// Stack pour l'onglet Scan
 function ScanStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
@@ -48,7 +24,6 @@ function ScanStack() {
   );
 }
 
-// Stack pour l'onglet History
 function HistoryStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
@@ -78,7 +53,31 @@ export default function App() {
 
   return (
     <NavigationContainer>
-      <Tab.Navigator>
+      <Tab.Navigator
+        screenOptions={({ route }) => ({
+          headerShown: false,
+          tabBarStyle: {
+            backgroundColor: '#6B2D3E',
+            borderTopWidth: 0,
+            height: 70,
+            paddingBottom: 10,
+            paddingTop: 8,
+          },
+          tabBarActiveTintColor: '#C9A96E',
+          tabBarInactiveTintColor: 'rgba(249,244,238,0.5)',
+          tabBarLabelStyle: {
+            fontSize: 12,
+            fontWeight: '600',
+          },
+          tabBarIcon: ({ focused, color }) => {
+            if (route.name === 'Scan') {
+              return <Text style={{ fontSize: 22 }}>📷</Text>;
+            } else if (route.name === 'History') {
+              return <Text style={{ fontSize: 22 }}>🍷</Text>;
+            }
+          },
+        })}
+      >
         <Tab.Screen name="Scan"    component={ScanStack} />
         <Tab.Screen name="History" component={HistoryStack} />
       </Tab.Navigator>
