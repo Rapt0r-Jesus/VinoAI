@@ -2,7 +2,7 @@ import { useState, useRef } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 
-const API_URL = 'http://10.5.3.46:3000/api/v1/scan';
+const API_URL = 'https://vinoai-production.up.railway.app/api/v1/scan';
 
 export default function CameraScreen({ navigation }) {
   const [permission, requestPermission] = useCameraPermissions();
